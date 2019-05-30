@@ -2,7 +2,6 @@
 
 /* @var $this \yii\web\View */
 /* @var $content string */
-
 use app\widgets\Alert;
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
@@ -10,8 +9,13 @@ use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Url;
 use app\assets\AppAsset;
-
+use app\widgets\LoginFormWidget;
+use app\widgets\SignupFormWidget;
 $homeUrl = Url::home();
+$bucketUrl = Url::to(["/site/bucket"]);
+$logoutUrl = Url::to(['site/logout']);
+$aboutUrl = Url::to(['site/about']);
+$contactsUrl = Url::to(['/site/contact']);
 
 AppAsset::register($this);
 ?>
@@ -26,6 +30,20 @@ AppAsset::register($this);
       href="https://fonts.googleapis.com/css?family=Poppins"
       rel="stylesheet"
     />
+    <?php if ($this->title == 'Contacts'): ?>
+      <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin=""
+      />
+      <script
+        src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+        integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+        crossorigin=""
+      ></script>
+    <?php endif; ?>
+    <script src="js/getTheme.js"></script>
      <?php $this->registerCsrfMetaTags(); ?>
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head(); ?>
@@ -45,8 +63,7 @@ AppAsset::register($this);
       $menuItems = [
         Html::a('Retheme', "#", [
           'id' => "toggle-theme",
-          'class' => 'right-block__link col-sm-12 col-md-2 col-lg-2',
-          'data-modal-open' => ''
+          'class' => 'right-block__link col-sm-12 col-md-2 col-lg-2'
         ])
       ];
       if (Yii::$app->user->isGuest) {
@@ -59,11 +76,12 @@ AppAsset::register($this);
           'data-modal-open' => ''
         ]);
       } else {
-        $menuItems[] = Html::a('Logout', "/site/logout", [
+        $menuItems[] = Html::a('Bucket', $bucketUrl, [
           'class' => 'right-block__link col-sm-12 col-md-2 col-lg-2'
         ]);
-        $menuItems[] = Html::a('Bucket', "/site/bucket", [
-          'class' => 'right-block__link col-sm-12 col-md-2 col-lg-2'
+        $menuItems[] = Html::a('Logout', $logoutUrl, [
+          'class' => 'right-block__link col-sm-12 col-md-2 col-lg-2',
+          'data-method' => 'POST'
         ]);
       }
       foreach ($menuItems as $item) {
@@ -72,56 +90,16 @@ AppAsset::register($this);
       ?>
     </div>
   </div>
-    </header>
-    <div id="loginModal" style="display:none">
-  <form>
-    <h2>
-      <b>Log in</b>
-    </h2>
-    <p>
-      <input
-        class="modal__field"
-        type="email"
-        name="email"
-        placeholder="Email..."
-      />
-      <input
-        class="modal__field"
-        type="password"
-        name="password"
-        placeholder="Password..."
-      />
-    </p>
-    <p><input type="submit" class="modal__submit-btn" value="Sign in" /></p>
-  </form>
-</div>
+</header>
+<?php
+echo Yii::$app->user->isGuest ? SignupFormWidget::widget([]) : '';
+echo Yii::$app->user->isGuest ? LoginFormWidget::widget([]) : '';
+?>
 <div class="modal">
   <div class="modal-inner">
     <i data-modal-close class="ion-md-close"></i>
     <div class="modal-content"></div>
   </div>
-</div>
-<div id="regisModal" style="display:none">
-  <form>
-    <h2>
-      <b>Registration</b>
-    </h2>
-    <p>
-      <input
-        class="modal__field"
-        type="email"
-        name="email"
-        placeholder="Email..."
-      />
-      <input
-        class="modal__field"
-        type="password"
-        name="password"
-        placeholder="Password..."
-      />
-    </p>
-    <p><input type="submit" class="modal__submit-btn" value="Sign up" /></p>
-  </form>
 </div>
 
     <?= $content ?>
@@ -130,15 +108,13 @@ AppAsset::register($this);
     <?= Html::a(
       '<img src="img/logo.png" alt="logo" class="logo" />',
       $homeUrl,
-      [
-        'class' => 'footer__link'
-      ]
+      ['class' => 'footer__link']
     ) ?>
   <div class="pages-block col-lg-4 col-md-6 col-sm-6">
-      <?= Html::a('Contacts', '/site/contacts', [
+      <?= Html::a('Contacts', $contactsUrl, [
         'class' => 'pages-block__link col-lg-6 col-md-6 col-sm-6'
       ]) ?>
-      <?= Html::a('About us', '/site/about-us', [
+      <?= Html::a('About us', $aboutUrl, [
         'class' => 'pages-block__link col-lg-6 col-md-6 col-sm-6'
       ]) ?>
   </div>

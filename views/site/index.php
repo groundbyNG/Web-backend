@@ -1,7 +1,15 @@
 <?php
 use app\assets\IndexAsset;
+use yii\helpers\Html;
+use yii\helpers\Url;
+
 IndexAsset::register($this);
+
 $this->title = 'Main page';
+
+$aboutUrl = Url::to(['site/about']);
+$contactsUrl = Url::to(['/site/contact']);
+$productsUrl = Url::to(['/site/products']);
 ?>
 
 <div class="display-container main-content">
@@ -15,19 +23,23 @@ $this->title = 'Main page';
           <div
             class="links-container__link-container col-lg-4 col-md-4 col-sm-4"
           >
-            <a href="./contacts.html" class="link-container__link">Contacts</a>
+          <?= Html::a('Contacts', $contactsUrl, [
+            'class' => 'link-container__link'
+          ]) ?>
           </div>
           <div
             class="links-container__link-container col-lg-4 col-md-4 col-sm-4"
           >
-            <a href="./about-us.html" class="link-container__link">About us</a>
+          <?= Html::a('About us', $aboutUrl, [
+            'class' => 'link-container__link'
+          ]) ?>
           </div>
           <div
             class="links-container__link-container col-lg-4 col-md-4 col-sm-4"
           >
-            <a href="./products.html" class="link-container__link"
-              >Choose a car...</a
-            >
+            <?= Html::a('Choose a car...', $productsUrl, [
+              'class' => 'link-container__link'
+            ]) ?>
           </div>
         </div>
       </div>
