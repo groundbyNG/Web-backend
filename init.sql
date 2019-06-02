@@ -12,7 +12,8 @@ CREATE TABLE car (
     id smallint unsigned not null auto_increment, 
     primary key (id),
     name varchar(20) not null, 
-    category_id smallint not null references category (id),
+    category_id smallint not null,
+    FOREIGN KEY (category_id) references category (id),
     year smallint not null,
     price mediumint not null,
     engine varchar(100) not null,
@@ -22,27 +23,30 @@ CREATE TABLE car (
 )
 COLLATE='utf8_general_ci';
 
-CREATE TABLE order (
-     id int not null auto_increment,
-     primary key (id),
-     status varchar(20) not null,
-     user_id smallint references users (id)
-);
-
-CREATE TABLE order_item (
-     id int not null auto_increment,
-      primary key (id),
-     order_id int not null references orders (id),
-     car_id int not null references car (id),
-     quantity smallint not null,
-);
-
 CREATE TABLE user (
      id int not null auto_increment,
      primary key (id),
      password longtext not null ,
      email varchar(32) not null,
      role varchar(32) not null
+);
+
+
+CREATE TABLE orders (
+     id int not null auto_increment primary key,
+     status boolean not null,
+     user_id int not null,
+     CONSTRAINT user_id_fk FOREIGN KEY (user_id) references user (id)
+);
+
+
+CREATE TABLE order_item (
+     id int auto_increment primary key,
+     order_id int not null,
+     CONSTRAINT order_id_fk FOREIGN KEY (order_id) references orders (id),
+     car_id smallint unsigned not null,
+     CONSTRAINT car_id_fk FOREIGN KEY (car_id) references car (id),
+     quantity smallint not null
 );
 
 

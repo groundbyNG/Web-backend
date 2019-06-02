@@ -3,6 +3,7 @@ use app\assets\ProductAsset;
 use yii\widgets\LinkPager;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\bootstrap\ActiveForm;
 
 ProductAsset::register($this);
 
@@ -57,24 +58,48 @@ $this->title = $car->name;
           <?= $car->description ?>
           </p>
           <h2>Options</h2>
-          <form class="info-c" oninput="result.value=(number.value*5000)+'$'">
+          <?php $form = ActiveForm::begin([
+            'action' => ['/site/add-bucket'],
+            'options' => [
+              'class' => 'info-c',
+              'method' => 'post'
+            ]
+          ]); ?>
             <div class="info-c__io-block">
               <output name="result"><?= $car->price ?>$</output>
-              <input
-                required
-                value="1"
-                max="100"
-                min="1"
-                type="number"
-                name="number"
-              />
+              <?php
+              echo $form
+                ->field($model, 'car_id', [
+                  'template' => "{label}\n{input}",
+                  'inputOptions' => [
+                    'type' => 'hidden',
+                    'value' => $car->id
+                  ]
+                ])
+                ->hint(false)
+                ->label(false);
+
+              echo $form
+                ->field($model, 'quantity', [
+                  'template' => "{label}\n{input}",
+                  'inputOptions' => [
+                    'required' => 'true',
+                    'value' => "1",
+                    'max' => "100",
+                    'min' => "1"
+                  ]
+                ])
+                ->input('number', [
+                  'oninput' => "result.value=($car->price*value)+'$'"
+                ])
+                ->hint(false)
+                ->label(false);
+              ?>
             </div>
             <?php if (Yii::$app->user->identity) {
-              echo Html::a(
-                'Add to bucket',
-                ['/site/bucket'],
-                ['class' => 'style-button']
-              );
+              echo Html::submitButton('Add to bucket', [
+                'class' => 'style-button'
+              ]);
               if (Yii::$app->user->identity->getRole() == 'admin') {
                 echo Html::a(
                   'Edit',
@@ -90,7 +115,7 @@ $this->title = $car->name;
             } else {
               echo "<b>Please login, to buy a car</b>";
             } ?>
-          </form>
+        <?php ActiveForm::end(); ?>
         </div>
       </div>
     </div>

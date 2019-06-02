@@ -8,17 +8,21 @@ use yii\web\Controller;
 use yii\web\Response;
 use yii\web\HttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use yii\data\Pagination;
 use app\models\User;
 use app\models\LoginForm;
 use app\models\SignupForm;
 use app\models\SearchForm;
+use app\models\AddCarForm;
 use app\models\Category;
+use app\models\Orders;
+use app\models\OrderItem;
+use yii\helpers\Url;
 use app\models\Car;
 
 class SiteController extends Controller
 {
-  public $filteredCarsQuery = '';
   /**
    * {@inheritdoc}
    */
@@ -27,10 +31,10 @@ class SiteController extends Controller
     return [
       'access' => [
         'class' => AccessControl::className(),
-        'only' => ['logout'],
+        'only' => ['logout', 'bucket'],
         'rules' => [
           [
-            'actions' => ['logout'],
+            'actions' => ['logout', 'bucket'],
             'allow' => true,
             'roles' => ['@']
           ]
@@ -119,9 +123,11 @@ class SiteController extends Controller
   {
     $car = Car::findOne($id);
     $category = strtolower(Category::findOne($car->category_id)->name);
+    $model = new AddCarForm();
     return $this->render('product', [
       'car' => $car,
-      'category' => $category
+      'category' => $category,
+      'model' => $model
     ]);
   }
 
@@ -252,8 +258,57 @@ class SiteController extends Controller
     return $this->goHome();
   }
 
+  public function actionAddBucket()
+  {
+    $model = new AddCarForm();
+    if ($model->load(Yii::$app->request->post())) {
+      if ($model->addToBucket()) {
+        $this->redirect(Url::to(['site/bucket']));
+      }
+    }
+  }
+
+  public function actionRemoveBucket($id)
+  {
+    if (OrderItem::findOne($id)->delete()) {
+      $this->redirect(Url::to(['site/bucket']));
+    } else {
+      return 'Remove error';
+    }
+  }
+
+  public function actionBuyBucket($id)
+  {
+    if (OrderItem::deleteAll("order_id = $id")) {
+      $this->redirect(Url::to(['site/bucket']));
+    } else {
+      return 'Remove error';
+    }
+  }
+
   public function actionBucket()
   {
-    return $this->render('bucket');
+    $order = Orders::findOne([
+      'user_id' => Yii::$app->user->identity->getId(),
+      'status' => 0
+    ]);
+    $order_items = OrderItem::findAll(['order_id' => $order->id]);
+    $func = function ($value) {
+      $car = Car::findOne($value->car_id);
+      $category = strtolower(Category::findOne($car->category_id)->name);
+      return [
+        'quantity' => $value->quantity,
+        'category' => $category,
+        'name' => $car->name,
+        'year' => $car->year,
+        'price' => $car->price,
+        'id' => $value->id
+      ];
+    };
+    $cars = array_map($func, $order_items);
+    return $this->render('bucket', [
+      'cars' => $cars,
+      'order_id' => $order->id
+    ]);
   }
 }
