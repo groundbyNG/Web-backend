@@ -25,12 +25,15 @@ class SignupForm extends Model
   public function signup()
   {
     if ($this->validate()) {
-      $user = new User();
-      $user->email = $this->email;
-      $user->setPassword($this->password);
-      $user->role = 'user';
-      return $user->save() ? $user : null;
+      if(!User::findByEmail($this->email)) {
+        $user = new User();
+        $user->email = $this->email;
+        $user->setPassword($this->password);
+        $user->role = 'user';
+        return $user->save() ? $user : null;
+      }
+      return 'exists';
     }
-    return false;
+    return 'not valid';
   }
 }

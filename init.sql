@@ -50,7 +50,7 @@ CREATE TABLE order_item (
 );
 
 
-
+-- TEST DATA, NOT USE, ADMIN ADDED IN CONTROLS
 -- INSERT INTO user ( email, password, role ) 
 --     VALUES 
 --         ( 'admin@admin.com', 'admin', 'admin' ),

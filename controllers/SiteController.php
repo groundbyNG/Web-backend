@@ -76,6 +76,13 @@ class SiteController extends Controller
     return $this->render('index');
   }
 
+  public function actionExistsError() {
+    return $this->render('error', [
+      'name' => 'User is exists',
+      'message' => 'User is exists'
+    ]);
+  }
+
   public function actionContact()
   {
     return $this->render('contact');
@@ -241,13 +248,21 @@ class SiteController extends Controller
   {
     $modelSign = new SignupForm();
     if ($modelSign->load(Yii::$app->request->post())) {
-      if ($user = $modelSign->signup()) {
-        if (Yii::$app->getUser()->login($user)) {
-          return $this->goHome();
-        }
-      } else {
+      $result = $modelSign->signup();
+      if ($result == 'not valid') {
         Yii::$app->response->format = yii\web\Response::FORMAT_JSON;
         return \yii\widgets\ActiveForm::validate($modelSign);
+      } else if ($result == 'exists') {
+        $this->redirect(Url::to(['site/exists-error']));
+      } else {
+        $user = $result;
+        if (Yii::$app->getUser()->login($user)) {
+          $newOrder = new Orders();
+          $newOrder->status = false;
+          $newOrder->user_id = Yii::$app->user->identity->getId();
+          $newOrder->save();
+          return $this->goHome();
+        }
       }
     }
   }
